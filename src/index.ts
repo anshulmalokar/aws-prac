@@ -1,4 +1,4 @@
-import { S3Client,GetObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client,GetObjectCommand,PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import process from "process";
 
@@ -31,10 +31,24 @@ class AwsService{
         const url = await getSignedUrl(client, command);
         return url;
     }
+
+    public async getPutPresignedUrl(contentType: string, name: string){
+        const key = `__output/${name}`;
+        const putObjectParams = {
+            Bucket: process.env.AWS_BUCKET,
+            Key: key,
+            ContentType: contentType
+        }
+        const command = new PutObjectCommand(putObjectParams);
+        const url = await getSignedUrl(client,command);
+        return url;
+    }
+
 }
 
 async function main(){
     const url = await AwsService.getInstance().getPreSignedUrl('download-goku.jpg');
+    // const url = await AwsService.getInstance().getPutPresignedUrl('image/jpeg','goku');
     console.log(url);
 }
 
